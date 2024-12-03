@@ -1,0 +1,89 @@
+{
+    "swagger": "2.0",
+    "info": {
+      "version": "1.0.0",
+      "title": "Task Management API",
+      "description": "API for managing user authentication and tasks."
+    },
+    "host": "localhost:3000",
+    "basePath": "/api",
+    "schemes": ["http"],
+    "paths": {
+      "/auth/register": {
+        "post": {
+          "summary": "Register a new user",
+          "parameters": [
+            {
+              "in": "body",
+              "name": "body",
+              "required": true,
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string" },
+                  "password": { "type": "string" }
+                }
+              }
+            }
+          ],
+          "responses": {
+            "201": { "description": "User created successfully" },
+            "400": { "description": "Invalid input" }
+          }
+        }
+      },
+      "/auth/login": {
+        "post": {
+          "summary": "Login a user",
+          "parameters": [
+            {
+              "in": "body",
+              "name": "body",
+              "required": true,
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string" },
+                  "password": { "type": "string" }
+                }
+              }
+            }
+          ],
+          "responses": {
+            "200": { "description": "Login successful" },
+            "401": { "description": "Invalid credentials" }
+          }
+        }
+      },
+      "/tasks": {
+        "get": {
+          "summary": "Get all tasks for authenticated user",
+          "responses": {
+            "200": { "description": "List of tasks" },
+            "401": { "description": "Unauthorized" }
+          }
+        },
+        "post": {
+          "summary": "Create a new task",
+          "parameters": [
+            {
+              "in": "body",
+              "name": "body",
+              "required": true,
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": { "type": "string" }
+                }
+              }
+            }
+          ],
+          "responses": {
+            "201": { "description": "Task created" },
+            "401": { "description": "Unauthorized" }
+          }
+        }
+      }
+    }
+  }
+  
