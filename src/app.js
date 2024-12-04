@@ -18,10 +18,13 @@ app.use(
         requestDurationBuckets: [0.1, 0.5, 1, 1.5], // Histogramas para duração das requisições
     })
 );
-
+app.get("/", (req, res) => {
+    res.send("Task Project!");
+});
 app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
 
 module.exports = app;
