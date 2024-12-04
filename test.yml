@@ -1,0 +1,40 @@
+config:
+  target: 'http://localhost:3000' # URL base da sua API
+  phases:
+    - duration: 60  # Duração total do teste (em segundos)
+      arrivalRate: 10 # 10 usuários/segundo
+scenarios:
+  - name: Register User
+    flow:
+      - post:
+          url: '/api/auth/register'
+          json:
+            username: 'user{{ $randomInt(1, 1000) }}'
+            password: 'password123'
+      - think: 2 # Aguarde 2 segundos antes do próximo passo
+
+  - name: Login User
+    flow:
+      - post:
+          url: '/api/auth/login'
+          json:
+            username: 'user1'
+            password: 'password123'
+      - think: 2
+
+  - name: Create Task
+    flow:
+      - post:
+          url: '/api/tasks'
+          headers:
+            Authorization: 'Bearer {{ token }}' # Substitua por um token real
+          json:
+            title: 'Minha Nova Tarefa'
+      - think: 2
+
+  - name: Fetch Tasks
+    flow:
+      - get:
+          url: '/api/tasks'
+          headers:
+            Authorization: 'Bearer {{ token }}' # Substitua por um token real

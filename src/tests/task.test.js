@@ -2,65 +2,85 @@ const request = require('supertest');
 const app = require('../app');
 const prisma = require('../models/prismaClient');
 
-let token;
+describe('Task Endpoints', () => {
+  let token;
+  let userId;
 
-beforeAll(async () => {
-  await prisma.task.deleteMany(); // Limpa tarefas para testes.
-  await prisma.user.deleteMany(); // Limpa usuários para testes.
+  beforeAll(async () => {
+    // Limpa o banco antes dos testes
+    await prisma.tasks.deleteMany();
+    await prisma.users.deleteMany();
 
-  // Registra e loga o usuário para obter o token.
-  await request(app).post('/api/auth/register').send({
-    email: 'testuser@example.com',
-    password: 'password123',
+    // Cria um usuário para os testes
+    const res = await request(app).post('/api/auth/register').send({
+      username: 'taskuser',
+      password: 'password123',
+    });
+
+    userId = res.body.user.id; // Armazena o ID do usuário criado
+
+    // Faz login para obter o token
+    const loginRes = await request(app).post('/api/auth/login').send({
+      username: 'taskuser',
+      password: 'password123',
+    });
+
+    token = loginRes.body.token;
   });
 
-  const response = await request(app).post('/api/auth/login').send({
-    email: 'testuser@example.com',
-    password: 'password123',
+  afterAll(async () => {
+    await prisma.$disconnect(); // Fecha a conexão com o banco
   });
 
-  token = response.body.token;
-});
-
-describe('Task Management Tests', () => {
-  test('Create a new task', async () => {
-    const response = await request(app)
+  it('Should create a new task', async () => {
+    const res = await request(app)
       .post('/api/tasks')
       .set('Authorization', `Bearer ${token}`)
-      .send({ title: 'Test Task' });
+      .send({
+        title: 'My first task',
+      });
 
-    expect(response.status).toBe(201);
-    expect(response.body).toHaveProperty('title', 'Test Task');
+    expect(res.statusCode).toBe(201);
+    expect(res.body).toHaveProperty('title', 'My first task');
   });
 
-  test('Get tasks for the user', async () => {
-    const response = await request(app)
+  it('Should fetch all tasks for the user', async () => {
+    const res = await request(app)
       .get('/api/tasks')
       .set('Authorization', `Bearer ${token}`);
 
-    expect(response.status).toBe(200);
-    expect(response.body.length).toBeGreaterThan(0);
+    expect(res.statusCode).toBe(200);
+    expect(res.body.length).toBeGreaterThan(0);
   });
 
-  test('Update a task', async () => {
-    const task = await prisma.task.findFirst();
-    const response = await request(app)
+  it('Should update a task', async () => {
+    // Cria uma tarefa para atualizar
+    const task = await prisma.tasks.create({
+      data: { title: 'Task to update', userId },
+    });
+
+    const res = await request(app)
       .put(`/api/tasks/${task.id}`)
       .set('Authorization', `Bearer ${token}`)
-      .send({ title: 'Updated Task', completed: true });
+      .send({
+        title: 'Updated task',
+      });
 
-    expect(response.status).toBe(200);
-    expect(response.body).toHaveProperty('title', 'Updated Task');
-    expect(response.body).toHaveProperty('completed', true);
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toHaveProperty('title', 'Updated task');
   });
 
-  test('Delete a task', async () => {
-    const task = await prisma.task.findFirst();
-    const response = await request(app)
+  it('Should delete a task', async () => {
+    // Cria uma tarefa para deletar
+    const task = await prisma.tasks.create({
+      data: { title: 'Task to delete', userId },
+    });
+
+    const res = await request(app)
       .delete(`/api/tasks/${task.id}`)
       .set('Authorization', `Bearer ${token}`);
 
-    expect(response.status).toBe(200);
-    expect(response.body).toHaveProperty('message', 'Task deleted successfully.');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toHaveProperty('message', 'Task deleted successfully.');
   });
 });

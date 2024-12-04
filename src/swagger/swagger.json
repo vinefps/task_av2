@@ -1,89 +1,117 @@
 {
-    "swagger": "2.0",
-    "info": {
-      "version": "1.0.0",
-      "title": "Task Management API",
-      "description": "API for managing user authentication and tasks."
-    },
-    "host": "localhost:3000",
-    "basePath": "/api",
-    "schemes": ["http"],
-    "paths": {
-      "/auth/register": {
-        "post": {
-          "summary": "Register a new user",
-          "parameters": [
-            {
-              "in": "body",
-              "name": "body",
-              "required": true,
+  "openapi": "3.0.0",
+  "info": {
+    "title": "API Task Manager",
+    "description": "Documentação da API para autenticação e gerenciamento de tarefas.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Servidor local"
+    }
+  ],
+  "paths": {
+    "/api/auth/register": {
+      "post": {
+        "summary": "Registrar um usuário",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
               "schema": {
                 "type": "object",
                 "properties": {
-                  "email": { "type": "string" },
-                  "password": { "type": "string" }
-                }
+                  "username": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "username",
+                  "password"
+                ]
               }
             }
-          ],
-          "responses": {
-            "201": { "description": "User created successfully" },
-            "400": { "description": "Invalid input" }
-          }
-        }
-      },
-      "/auth/login": {
-        "post": {
-          "summary": "Login a user",
-          "parameters": [
-            {
-              "in": "body",
-              "name": "body",
-              "required": true,
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "email": { "type": "string" },
-                  "password": { "type": "string" }
-                }
-              }
-            }
-          ],
-          "responses": {
-            "200": { "description": "Login successful" },
-            "401": { "description": "Invalid credentials" }
-          }
-        }
-      },
-      "/tasks": {
-        "get": {
-          "summary": "Get all tasks for authenticated user",
-          "responses": {
-            "200": { "description": "List of tasks" },
-            "401": { "description": "Unauthorized" }
           }
         },
-        "post": {
-          "summary": "Create a new task",
-          "parameters": [
-            {
-              "in": "body",
-              "name": "body",
-              "required": true,
+        "responses": {
+          "201": {
+            "description": "Usuário registrado com sucesso"
+          },
+          "400": {
+            "description": "Erro de validação"
+          }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "summary": "Autenticar um usuário",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
               "schema": {
                 "type": "object",
                 "properties": {
-                  "title": { "type": "string" }
-                }
+                  "username": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "username",
+                  "password"
+                ]
               }
             }
-          ],
-          "responses": {
-            "201": { "description": "Task created" },
-            "401": { "description": "Unauthorized" }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Usuário autenticado com sucesso"
+          },
+          "401": {
+            "description": "Credenciais inválidas"
+          }
+        }
+      }
+    },
+    "/api/tasks": {
+      "post": {
+        "summary": "Criar uma nova tarefa",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "title"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Tarefa criada com sucesso"
+          },
+          "400": {
+            "description": "Erro ao criar tarefa"
           }
         }
       }
     }
   }
-  
+}

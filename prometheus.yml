@@ -1,0 +1,8 @@
+global:
+  scrape_interval: 15s # Intervalo de coleta de métricas
+  evaluation_interval: 15s # Intervalo de avaliação das regras
+
+scrape_configs:
+  - job_name: 'TASK_AV2' # Nome do trabalho (sua aplicação)
+    static_configs:
+      - targets: ['localhost:3000'] # URL onde sua aplicação está rodando

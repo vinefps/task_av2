@@ -1,23 +1,29 @@
-datasource db {
-  provider = "mysql" // ou "postgresql" dependendo do Railway
-  url      = env("DATABASE_URL")
-}
-
 generator client {
   provider = "prisma-client-js"
 }
 
-model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  password  String
-  tasks     Task[]
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
 }
 
-model Task {
+model tasks {
+  id          Int      @id @default(autoincrement())
+  title       String   @db.VarChar(255)
+  description String?  @db.Text
+  userId      Int
+  createdAt   DateTime @default(now()) @db.Timestamp(0)
+  updatedAt   DateTime @default(now()) @updatedAt @db.Timestamp(0)
+  users       users    @relation(fields: [userId], references: [id], onDelete: Cascade, map: "tasks_ibfk_1")
+
+  @@index([userId], map: "userId")
+}
+
+model users {
   id        Int      @id @default(autoincrement())
-  title     String
-  completed Boolean  @default(false)
-  userId    Int
-  user      User     @relation(fields: [userId], references: [id])
+  username  String   @unique(map: "username") @db.VarChar(255)
+  password  String   @db.VarChar(255)
+  createdAt DateTime @default(now()) @db.DateTime(0)
+  updatedAt DateTime @default(now()) @updatedAt @db.DateTime(0)
+  tasks     tasks[]
 }

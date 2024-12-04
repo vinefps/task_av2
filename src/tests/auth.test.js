@@ -2,35 +2,52 @@ const request = require('supertest');
 const app = require('../app');
 const prisma = require('../models/prismaClient');
 
-beforeAll(async () => {
-  await prisma.user.deleteMany(); // Limpa usuários para testes.
-});
-
-describe('Authentication Tests', () => {
-  test('Register a new user', async () => {
-    const response = await request(app).post('/api/auth/register').send({
-      email: 'test@example.com',
-      password: 'password123',
-    });
-    expect(response.status).toBe(201);
-    expect(response.body.user).toHaveProperty('email', 'test@example.com');
+describe('Auth Endpoints', () => {
+  beforeAll(async () => {
+    await prisma.users.deleteMany(); // Limpa os usuários antes dos testes
   });
 
-  test('Login with valid credentials', async () => {
-    const response = await request(app).post('/api/auth/login').send({
-      email: 'test@example.com',
-      password: 'password123',
-    });
-    expect(response.status).toBe(200);
-    expect(response.body).toHaveProperty('token');
+  afterAll(async () => {
+    await prisma.$disconnect(); // Fecha a conexão com o banco
   });
 
-  test('Login with invalid credentials', async () => {
-    const response = await request(app).post('/api/auth/login').send({
-      email: 'test@example.com',
+  it('Should register a new user', async () => {
+    const res = await request(app).post('/api/auth/register').send({
+      username: 'testuser1',
+      password: 'password123',
+    });
+
+    expect(res.statusCode).toBe(201);
+    expect(res.body.user).toHaveProperty('username', 'testuser1');
+  });
+
+  it('Should not register a user with existing username', async () => {
+    const res = await request(app).post('/api/auth/register').send({
+      username: 'testuser1', // Mesmo username para causar o erro
+      password: 'password123',
+    });
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body).toHaveProperty('error', 'Could not create user.');
+  });
+
+  it('Should login with correct credentials', async () => {
+    const res = await request(app).post('/api/auth/login').send({
+      username: 'testuser1',
+      password: 'password123',
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toHaveProperty('token');
+  });
+
+  it('Should not login with incorrect credentials', async () => {
+    const res = await request(app).post('/api/auth/login').send({
+      username: 'testuser1',
       password: 'wrongpassword',
     });
-    expect(response.status).toBe(401);
-    expect(response.body).toHaveProperty('error', 'Invalid credentials.');
+
+    expect(res.statusCode).toBe(401);
+    expect(res.body).toHaveProperty('error', 'Invalid credentials.');
   });
 });
